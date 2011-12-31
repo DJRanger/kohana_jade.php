@@ -1,0 +1,7 @@
+A simple wrapper for jade.php so that it can be used with Kohana 3.
+
+To install it, just place it in your modules folder and enable it in your bootstrap.
+
+By default it will cache the generated PHP files and use those when Kohana::$environment != Kohana::DEVELOPMENT.
+
+You may change when it caches, where and what extension to use in the config file.
