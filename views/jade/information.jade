@@ -1,0 +1,8 @@
+table(style="margin: 10px 0;")
+	tr
+		th(style="text-align: left; border-right: 1px solid; border-bottom: 1px solid; padding-right: 5px;") Total jade views:
+		td(style="padding-left: 5px; border-bottom: 1px solid;")=count(Jade_View::$views)
+	- foreach (Jade_View::$views as $view => $output):
+		tr
+			th(style="text-align: left; border-right: 1px solid; padding-right: 5px;")=Debug::path($view)
+			td(style="padding-left: 5px;")=Debug::path($output)

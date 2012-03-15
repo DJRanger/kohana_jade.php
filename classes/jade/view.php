@@ -16,6 +16,8 @@ require Kohana::find_file('vendor/jade.php/vendor', 'symfony/src/Symfony/Framewo
 require Kohana::find_file('vendor/jade.php', 'autoload.php', 'dist');
 
 class Jade_View extends Kohana_View{
+	public static $views = array();
+	
 	public function __construct($file = NULL, array $data = NULL){
 		parent::__construct($file, $data);
 		
@@ -77,6 +79,7 @@ class Jade_View extends Kohana_View{
 			$hash   = md5($this->_file);
 			
 			$parsed_file = Kohana::$config->load('jade.cache') . $hash . '.php';
+			self::$views[ $this->_file ] = $parsed_file;
 			
 			if ( ! Kohana::$config->load('jade.cache_files') || ! is_file($parsed_file) ){
 				file_put_contents($parsed_file, $jade->render($this->_file));
