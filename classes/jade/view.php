@@ -1,33 +1,25 @@
 <?php
-use Symfony\Framework\UniversalClassLoader;
-
-use Everzet\Jade\Jade;
-use Everzet\Jade\Parser;
-use Everzet\Jade\Lexer\Lexer;
-use Everzet\Jade\Dumper\PHPDumper;
-use Everzet\Jade\Visitor\AutotagsVisitor;
-
-use Everzet\Jade\Filter\JavaScriptFilter;
-use Everzet\Jade\Filter\CDATAFilter;
-use Everzet\Jade\Filter\PHPFilter;
-use Everzet\Jade\Filter\CSSFilter;
-
-require Kohana::find_file('vendor/jade.php/vendor', 'symfony/src/Symfony/Framework/UniversalClassLoader');
-require Kohana::find_file('vendor/jade.php', 'autoload.php', 'dist');
+require_once Kohana::find_file('vendor/jade.php', 'work');
+require_once Kohana::find_file('vendor/jade.php/lib', 'Node');
+require_once Kohana::find_file('vendor/jade.php/lib', 'Dumper');
+require_once Kohana::find_file('vendor/jade.php/lib', 'Lexer');
+require_once Kohana::find_file('vendor/jade.php/lib', 'Parser');
+require_once Kohana::find_file('vendor/jade.php', 'Jade');
 
 class Jade_View extends Kohana_View{
 	public static $views = array();
+	protected $jade;
 	
 	public function __construct($file = NULL, array $data = NULL){
+		if ( ! isset($this->jade) ){
+			 $this->jade = new Jade();
+		}
+		
 		parent::__construct($file, $data);
 		
 		if ( ! is_dir(APPPATH.'cache/jade') ){
 			mkdir(APPPATH.'cache/jade');
 		}
-
-		$loader = new UniversalClassLoader();
-		$loader->registerNamespaces(array('Everzet' => __DIR__.'/src'));
-		$loader->register();
 	}
 	
 	public function set_filename($file)
@@ -66,23 +58,13 @@ class Jade_View extends Kohana_View{
 		$info = pathinfo($this->_file);
 		
 		if ($info['extension'] === $jade_ext){
-			$dumper = new PHPDumper();
-			$dumper->registerVisitor('tag', new AutotagsVisitor());
-			$dumper->registerFilter('javascript', new JavaScriptFilter());
-			$dumper->registerFilter('cdata', new CDATAFilter());
-			$dumper->registerFilter('php', new PHPFilter());
-			$dumper->registerFilter('style', new CSSFilter());
-			
-			// Initialize parser & Jade
-			$parser = new Parser(new Lexer());
-			$jade   = new Jade($parser, $dumper);
 			$hash   = md5($this->_file);
 			
 			$parsed_file = Kohana::$config->load('jade.cache') . $hash . '.php';
 			self::$views[ $this->_file ] = $parsed_file;
 			
 			if ( ! Kohana::$config->load('jade.cache_files') || ! is_file($parsed_file) ){
-				file_put_contents($parsed_file, $jade->render($this->_file));
+				file_put_contents($parsed_file, $this->jade->render($this->_file));
 			}
 			
 			// Parse a template (both string & file containers)
